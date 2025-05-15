@@ -90,4 +90,18 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toUserResponseDTO(updatedUser);
     }
+
+    @Override
+    public void deleteByUserId(String id) {
+        log.info("UserServiceImpl::deleteByUserId");
+
+        boolean isUserExists = userRepository.existsById(id);
+
+        if (!isUserExists) {
+            log.error("UserServiceImpl::deleteByUserId User with id {} not found", id);
+            throw new UserNotFoundException("User with id " + id + " not found");
+        }
+
+        userRepository.deleteById(id);
+    }
 }

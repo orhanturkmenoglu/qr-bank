@@ -14,4 +14,6 @@ public interface UserService {
     UserResponseDTO getUserById(String id);
 
     UserResponseDTO updateUser(String id, UserRequestDTO userRequestDTO);
+
+    void deleteByUserId(String id);
 }
