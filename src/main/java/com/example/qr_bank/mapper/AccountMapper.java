@@ -12,7 +12,9 @@ public interface AccountMapper {
 
     Account toAccount(AccountRequestDTO accountRequestDTO);
 
-    AccountResponseDTO  toAccountResponseDTO(Account account);
+    AccountResponseDTO toAccountResponseDTO(Account account);
 
     List<AccountResponseDTO> toAccountResponseDTOs(List<Account> accounts);
+
+    List<AccountResponseDTO> toAccountResponseDTOs(Account account);
 }
