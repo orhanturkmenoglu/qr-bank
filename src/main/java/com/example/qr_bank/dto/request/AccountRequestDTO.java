@@ -1,7 +1,6 @@
 package com.example.qr_bank.dto.request;
 
 import com.example.qr_bank.enums.CurrencyType;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +13,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class AccountRequestDTO implements Serializable {
-
-    @JsonProperty("currency_type")
-    private CurrencyType currencyType;
+    // kullancı birden fazla hesap oluşturabilir.
+    private CurrencyType currency;
 }

@@ -4,9 +4,14 @@ import com.example.qr_bank.model.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, String> {
-    Optional<Account> findAllByOwnerId(String userId);
+    List<Account> findAllByOwnerId(String userId);
+
+    boolean existsAccountByIban(String iban);
+
+    Optional<Account> findByIban(String iban);
 }

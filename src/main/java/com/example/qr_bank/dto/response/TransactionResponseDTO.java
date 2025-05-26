@@ -22,5 +22,6 @@ public class TransactionResponseDTO implements Serializable {
     private BigDecimal amount;
     private TransactionStatus status;
     private LocalDateTime timeStamp;
+    private String description;
 
 }

@@ -1,0 +1,58 @@
+package com.example.qr_bank.mapper.impl;
+
+import com.example.qr_bank.dto.request.UserRequestDTO;
+import com.example.qr_bank.dto.response.UserResponseDTO;
+import com.example.qr_bank.enums.Role;
+import com.example.qr_bank.mapper.UserMapper;
+import com.example.qr_bank.model.User;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.UUID;
+
+@Component
+public class UserMapperImpl implements UserMapper {
+    @Override
+    public User toUser(UserRequestDTO userRequestDTO) {
+
+        if (userRequestDTO == null) {
+            return null;
+        }
+
+        return User.builder()
+                .id(UUID.randomUUID().toString())
+                .firstName(userRequestDTO.getFirstName())
+                .lastName(userRequestDTO.getLastName())
+                .email(userRequestDTO.getEmail())
+                .password(userRequestDTO.getPassword())
+                .role(Role.USER)
+                .build();
+    }
+
+    @Override
+    public UserResponseDTO toUserResponseDTO(User user) {
+
+        if (user == null) {
+            return null;
+        }
+
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
+    }
+
+    @Override
+    public List<UserResponseDTO> toUserResponseDTOs(List<User> users) {
+
+        if (users == null) {
+            return null;
+        }
+        return users.stream()
+                .map(this::toUserResponseDTO).toList();
+    }
+}

@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class QrCodeResponse implements Serializable {
+public class QrCodeResponseDTO implements Serializable {
 
     private String qrContent;
     private LocalDateTime createdAt;

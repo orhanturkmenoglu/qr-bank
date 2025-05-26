@@ -5,17 +5,23 @@ import com.example.qr_bank.dto.response.UserResponseDTO;
 import com.example.qr_bank.enums.Role;
 import com.example.qr_bank.exception.UserAlreadyExistsException;
 import com.example.qr_bank.exception.UserNotFoundException;
+import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.mapper.UserMapper;
+import com.example.qr_bank.model.Account;
 import com.example.qr_bank.model.User;
 import com.example.qr_bank.repository.UserRepository;
 import com.example.qr_bank.service.UserService;
+import com.example.qr_bank.utils.GenerateIban;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,28 +29,41 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
     private final UserMapper userMapper;
+    private final AccountMapper accountMapper;
 
+    @Transactional
     @Override
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
         log.info("UserServiceImpl::createUser {}", userRequestDTO);
 
-        if (Objects.isNull(userRequestDTO)) {
+        if (ObjectUtils.isEmpty(userRequestDTO)) {
             log.error("UserServiceImpl::createUser UserRequestDTO is null");
             throw new NullPointerException("UserRequestDTO is null");
         }
 
         boolean isEmailExists = userRepository.existsByEmail(userRequestDTO.getEmail());
 
-        if (!isEmailExists) {
+        if (isEmailExists) {
             log.error("UserServiceImpl::createUser User with email {} already exists", userRequestDTO.getEmail());
             throw new UserAlreadyExistsException("User with email " + userRequestDTO.getEmail() + " already exists");
         }
 
         User user = userMapper.toUser(userRequestDTO);
-        user.setId(UUID.randomUUID().toString());
-        user.setRole(Role.USER);
+
+        List<Account> accounts = userRequestDTO.getAccountRequestDTOS()
+                .stream()
+                .map(accountDto->{
+                    Account account = accountMapper.toAccount(accountDto);
+                    account.setOwner(user);
+                    account.setBalance(BigDecimal.ZERO);
+                    account.setIban(GenerateIban.generateIban());
+                    account.setCurrency(userRequestDTO.getAccountRequestDTOS().get(0).getCurrency());
+                    return account;
+                })
+                .collect(Collectors.toList());
+
+        user.setAccountList(accounts);
 
         User savedUser = userRepository.save(user);
         log.info("UserServiceImpl::createUser saved user {}", savedUser);

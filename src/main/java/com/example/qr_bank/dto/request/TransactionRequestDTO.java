@@ -17,4 +17,5 @@ public class TransactionRequestDTO implements Serializable {
     private String senderAccountIban;
     private String receiverAccountIban;
     private BigDecimal amount;
+    private String description;
 }

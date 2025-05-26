@@ -1,21 +1,20 @@
 package com.example.qr_bank.model;
 
 import com.example.qr_bank.enums.TransactionStatus;
+import com.example.qr_bank.enums.TransactionType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "transactions")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Transaction  extends BaseEntity{
+public class Transaction extends BaseEntity {
 
     @Id
     private String id;
@@ -31,8 +30,14 @@ public class Transaction  extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
 
+    @Enumerated(EnumType.STRING)
+    private TransactionType transactionType;
 
-    @OneToOne
+    private String description;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "qr_code_id")
     private QrCode qrCode;
+
 
 }

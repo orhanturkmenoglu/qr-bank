@@ -2,25 +2,21 @@ package com.example.qr_bank.model;
 
 import com.example.qr_bank.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User extends BaseEntity {
 
     @Id
     private String id;
-
-    @Column(name = "user_name")
-    private String username;
 
     @Column(name = "first_name")
     private String firstName;
@@ -40,10 +36,5 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Account> accountList;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
 
 }

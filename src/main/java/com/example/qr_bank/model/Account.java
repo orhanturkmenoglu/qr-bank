@@ -2,23 +2,22 @@ package com.example.qr_bank.model;
 
 import com.example.qr_bank.enums.CurrencyType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
 @Table(name = "accounts")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Account extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String iban;
@@ -37,5 +36,7 @@ public class Account extends BaseEntity {
     @OneToMany(mappedBy = "receiverAccount")
     private List<Transaction> receivedTransactions;
 
+    @OneToMany(mappedBy = "account",cascade = CascadeType.ALL)
+    private List<QrCode> qrCodes;
 
 }
