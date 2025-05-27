@@ -39,5 +39,4 @@ public class Transaction extends BaseEntity {
     @JoinColumn(name = "qr_code_id")
     private QrCode qrCode;
 
-
 }

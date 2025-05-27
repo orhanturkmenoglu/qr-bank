@@ -1,7 +1,15 @@
 package com.example.qr_bank.enums;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Currency type enum")
 public enum CurrencyType {
-    TRY,
+    @Schema(description = "US Dollar")
     USD,
-    EUR
+
+    @Schema(description = "Euro")
+    EUR,
+
+    @Schema(description = "Turkish Lira")
+    TRY
 }

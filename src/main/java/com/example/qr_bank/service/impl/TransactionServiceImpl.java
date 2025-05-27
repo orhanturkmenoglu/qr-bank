@@ -55,17 +55,19 @@ public class TransactionServiceImpl implements TransactionService {
             throw new AccountIbanNotFoundException("Sender account IBAN not found");
         }
 
-        TransactionType transactionType = transactionRequestDTO.getTransactionType();
-
-        if (!transactionType.equals(TransactionType.TRANSFER)) {
-            log.error("TransactionServiceImpl::sendMoney Transaction type must be TRANSFER");
-            throw new IllegalArgumentException("Transaction type must be TRANSFER");
-        }
-
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             log.error("Transaction  ServiceImpl::sendMoney Amount cannot be negative");
             throw new IllegalArgumentException("Amount cannot be negative");
         }
+
+
+        TransactionType transactionType = transactionRequestDTO.getTransactionType();
+
+        if (!(transactionType == TransactionType.TRANSFER || transactionType == TransactionType.EFT || transactionType == TransactionType.HAVALE ||
+                transactionType == TransactionType.QR_SEND)) {
+            throw new IllegalArgumentException("Invalid transaction type for sendMoney");
+        }
+
 
 
         AccountResponseDTO senderResponseDTO = accountService.getAccountByIban(senderAccountIban);
@@ -108,14 +110,20 @@ public class TransactionServiceImpl implements TransactionService {
         log.info("TransactionServiceImpl::receiveMoney transactionId: {}", transactionId);
         log.info("TransactionServiceImpl::receiveMoney receiverAccountIban: {}", receiverAccountIban);
 
-        //  Transaction'ı kontrol et
-        Transaction transaction = transactionRepository.findById(transactionId)
-                .orElseThrow(() -> new IllegalStateException("Transaction not found"));
-
         // IBAN boş mu?
         if (!StringUtils.hasText(receiverAccountIban)){
             log.error("Receiver IBAN cannot be empty");
             throw new IllegalArgumentException("Receiver IBAN cannot be empty");
+        }
+
+        //  Transaction'ı kontrol et
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new IllegalStateException("Transaction not found"));
+
+        // Transaction durumu PENDING mi?
+        if (!transaction.getStatus().equals(TransactionStatus.PENDING)){
+            log.error("Transaction status is not PENDING. Current status: {}", transaction.getStatus());
+            throw new IllegalStateException("Transaction status must be PENDING to receive money");
         }
 
         // IBAN eşleşiyor mu?
@@ -124,11 +132,6 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Receiver IBAN mismatch");
         }
 
-        // Transaction durumu PENDING mi?
-        if (!transaction.getStatus().equals(TransactionStatus.PENDING)){
-            log.error("Transaction status is not PENDING. Current status: {}", transaction.getStatus());
-            throw new IllegalStateException("Transaction status must be PENDING to receive money");
-        }
 
         //  Alıcı hesabı getir
         AccountResponseDTO receiverResponse = accountService.getAccountByIban(receiverAccountIban);

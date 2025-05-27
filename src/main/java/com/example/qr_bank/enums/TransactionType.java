@@ -1,8 +1,28 @@
 package com.example.qr_bank.enums;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Types of transactions supported by the system")
 public enum TransactionType {
+
+    @Schema(description = "Transaction via QR code send")
     QR_SEND,
-    DEPOSIT, WITHDRAWAL,
+
+    @Schema(description = "Deposit transaction")
+    DEPOSIT,
+
+    @Schema(description = "Withdrawal transaction")
+    WITHDRAWAL,
+
+    @Schema(description = "Transaction via QR code receive")
     QR_RECEIVE,
-    TRANSFER
+
+    @Schema(description = "Transfer transaction")
+    TRANSFER,
+
+    @Schema(description = "Electronic Funds Transfer")
+    EFT,
+
+    @Schema(description = "Internal transfer between accounts")
+    HAVALE
 }
