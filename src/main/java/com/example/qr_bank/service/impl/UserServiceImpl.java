@@ -2,7 +2,6 @@ package com.example.qr_bank.service.impl;
 
 import com.example.qr_bank.dto.request.UserRequestDTO;
 import com.example.qr_bank.dto.response.UserResponseDTO;
-import com.example.qr_bank.enums.Role;
 import com.example.qr_bank.exception.UserAlreadyExistsException;
 import com.example.qr_bank.exception.UserNotFoundException;
 import com.example.qr_bank.mapper.AccountMapper;
@@ -20,7 +19,6 @@ import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,7 +51,7 @@ public class UserServiceImpl implements UserService {
 
         List<Account> accounts = userRequestDTO.getAccountRequestDTOS()
                 .stream()
-                .map(accountDto->{
+                .map(accountDto -> {
                     Account account = accountMapper.toAccount(accountDto);
                     account.setOwner(user);
                     account.setBalance(BigDecimal.ZERO);
@@ -68,7 +66,9 @@ public class UserServiceImpl implements UserService {
         User savedUser = userRepository.save(user);
         log.info("UserServiceImpl::createUser saved user {}", savedUser);
 
+        log.info("UserServiceImpl::createUser created user {}", savedUser);
         return userMapper.toUserResponseDTO(savedUser);
+
     }
 
     @Override

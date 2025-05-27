@@ -1,23 +1,34 @@
 package com.example.qr_bank.mapper.impl;
 
+import com.example.qr_bank.dto.request.AccountRequestDTO;
 import com.example.qr_bank.dto.request.UserRequestDTO;
 import com.example.qr_bank.dto.response.UserResponseDTO;
 import com.example.qr_bank.enums.Role;
+import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.mapper.UserMapper;
+import com.example.qr_bank.model.Account;
 import com.example.qr_bank.model.User;
+import com.example.qr_bank.utils.GenerateIban;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
 public class UserMapperImpl implements UserMapper {
+
+    private final AccountMapper accountMapper;
+
     @Override
     public User toUser(UserRequestDTO userRequestDTO) {
 
         if (userRequestDTO == null) {
             return null;
         }
+
 
         return User.builder()
                 .id(UUID.randomUUID().toString())
@@ -36,6 +47,16 @@ public class UserMapperImpl implements UserMapper {
             return null;
         }
 
+        List<Account> accountList = user.getAccountList();
+
+        for (Account account : accountList) {
+            account.setOwner(user);
+            account.setCurrency(user.getAccountList().get(0).getCurrency());
+            account.setQrCodes(null);
+            account.setSentTransactions(null);
+            account.setReceivedTransactions(null);
+        }
+
         return UserResponseDTO.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())
@@ -43,6 +64,7 @@ public class UserMapperImpl implements UserMapper {
                 .email(user.getEmail())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .accountList(accountMapper.toAccountResponseDTOs(accountList))
                 .build();
     }
 

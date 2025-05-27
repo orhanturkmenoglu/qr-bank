@@ -1,6 +1,5 @@
 package com.example.qr_bank.service.impl;
 
-import com.example.qr_bank.dto.request.AccountUpdateRequestDTO;
 import com.example.qr_bank.dto.request.TransactionOperationRequestDTO;
 import com.example.qr_bank.dto.request.TransactionRequestDTO;
 import com.example.qr_bank.dto.response.AccountResponseDTO;
@@ -23,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -36,74 +36,115 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountMapper accountMapper;
     private final TransactionMapper transactionMapper;
-    private final AccountRepository accountRepository;
 
     @Transactional
     @Override
     public TransactionResponseDTO sendMoney(TransactionRequestDTO transactionRequestDTO) {
         log.info("TransactionServiceImpl::sendMoney {}", transactionRequestDTO);
-/*
+
         BigDecimal amount = transactionRequestDTO.getAmount();
-
-        AccountResponseDTO senderDto = accountService.getAccountByIban(transactionRequestDTO.getSenderAccountIban());
-        AccountResponseDTO receiverDto = accountService.getAccountByIban(transactionRequestDTO.getReceiverAccountIban());
-
-        Account senderAccount = accountMapper.toAccount(senderDto);
-        Account receiverAccount = accouaccountMapperntMapperImpl.toAccount(receiverDto);
+        String senderAccountIban = transactionRequestDTO.getSenderAccountIban();
+        String receiverAccountIban = transactionRequestDTO.getReceiverAccountIban();
 
         if (ObjectUtils.isEmpty(transactionRequestDTO)) {
             log.error("TransactionServiceImpl::sendMoney TransactionRequestDTO is null");
             throw new TransactionNullPointerException("TransactionRequestDTO is null");
         }
 
-        validateIbans(transactionRequestDTO);
-        validateDifferentAccounts(transactionRequestDTO);
-
-
-        if (senderAccount.getBalance().compareTo(amount) < 0) {
-            log.error("TransactionServiceImpl::sendMoney Sender account does not have enough balance");
-            throw new IllegalArgumentException("Sender account does not have enough balance");
+        if (!accountService.existsAccountByIban(transactionRequestDTO.getSenderAccountIban())) {
+            throw new AccountIbanNotFoundException("Sender account IBAN not found");
         }
 
-        // hesap güncelle
-        senderAccount.setBalance(senderAccount.getBalance().subtract(amount));
-        receiverAccount.setBalance(receiverAccount.getBalance().add(amount));
+        TransactionType transactionType = transactionRequestDTO.getTransactionType();
+
+        if (!transactionType.equals(TransactionType.TRANSFER)) {
+            log.error("TransactionServiceImpl::sendMoney Transaction type must be TRANSFER");
+            throw new IllegalArgumentException("Transaction type must be TRANSFER");
+        }
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            log.error("Transaction  ServiceImpl::sendMoney Amount cannot be negative");
+            throw new IllegalArgumentException("Amount cannot be negative");
+        }
 
 
-        accountService.updateAccount(senderAccount.getId(), accountMapperImpl.toAccountRequestDto(senderAccount));
-        accountService.updateAccount(receiverAccount.getId(), accountMapperImpl.toAccountRequestDto(receiverAccount));
+        AccountResponseDTO senderResponseDTO = accountService.getAccountByIban(senderAccountIban);
+        AccountResponseDTO receiverResponseDTO = accountService.getAccountByIban(receiverAccountIban);
+
+        Account sender = accountMapper.toAccountResponseDTO(senderResponseDTO);
+        Account receiver = accountMapper.toAccountResponseDTO(receiverResponseDTO);
+
+        if (sender.getBalance().compareTo(amount) < 0) {
+            log.error("TransactionServiceImpl::sendMoney Sender balance is not enough");
+            throw new IllegalArgumentException("Sender balance is not enough");
+        }
+
+        sender.setBalance(sender.getBalance().subtract(amount));
+
+        accountService.updateAccount(sender.getId(), accountMapper.toAccountUpdateRequestDTO(sender));
 
         Transaction transaction = Transaction.builder()
                 .id(UUID.randomUUID().toString())
-                .senderAccount(senderAccount)
-                .receiverAccount(receiverAccount)
-                .status(TransactionStatus.COMPLETED)
+                .senderAccount(sender)
+                .receiverAccount(receiver)
                 .amount(amount)
+                .transactionType(transactionType)
+                .description(transactionRequestDTO.getDescription())
+                .status(TransactionStatus.PENDING)
                 .qrCode(null)
                 .build();
 
+        Transaction saved = transactionRepository.save(transaction);
 
-        Transaction saveTransaction = transactionRepository.save(transaction);
-        log.info("TransactionServiceImpl::sendMoney saved transaction {}", saveTransaction);
+        log.info("TransactionServiceImpl::sendMoney Transaction saved {}", saved);
 
-        return transactionMapperImpl.toTransactionResponseDTO(saveTransaction);*/
-
-        return null;
+        return transactionMapper.toTransactionResponseDTO(saved);
     }
 
     @Override
-    public TransactionResponseDTO receiveMoney(TransactionRequestDTO transactionRequestDTO) {
-        log.info("TransactionServiceImpl::receiveMoney {}", transactionRequestDTO);
+    public TransactionResponseDTO receiverMoney(String transactionId,
+                                                String receiverAccountIban) {
 
-        if (ObjectUtils.isEmpty(transactionRequestDTO)) {
-            log.error("TransactionServiceImpl::receiveMoney TransactionRequestDTO is null");
-            throw new TransactionNullPointerException("TransactionRequestDTO is null");
+        log.info("TransactionServiceImpl::receiveMoney transactionId: {}", transactionId);
+        log.info("TransactionServiceImpl::receiveMoney receiverAccountIban: {}", receiverAccountIban);
+
+        //  Transaction'ı kontrol et
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new IllegalStateException("Transaction not found"));
+
+        // IBAN boş mu?
+        if (!StringUtils.hasText(receiverAccountIban)){
+            log.error("Receiver IBAN cannot be empty");
+            throw new IllegalArgumentException("Receiver IBAN cannot be empty");
         }
 
+        // IBAN eşleşiyor mu?
+        if (!transaction.getReceiverAccount().getIban().equals(receiverAccountIban)){
+            log.error("Receiver IBAN mismatch. Expected: {}, Provided: {}", transaction.getReceiverAccount().getIban(), receiverAccountIban);
+            throw new IllegalArgumentException("Receiver IBAN mismatch");
+        }
 
-        validateIbans(transactionRequestDTO);
+        // Transaction durumu PENDING mi?
+        if (!transaction.getStatus().equals(TransactionStatus.PENDING)){
+            log.error("Transaction status is not PENDING. Current status: {}", transaction.getStatus());
+            throw new IllegalStateException("Transaction status must be PENDING to receive money");
+        }
 
-        return null;
+        //  Alıcı hesabı getir
+        AccountResponseDTO receiverResponse = accountService.getAccountByIban(receiverAccountIban);
+        Account receiver = accountMapper.toAccountResponseDTO(receiverResponse);
+
+        //  Alıcı bakiyesine parayı ekle
+        receiver.setBalance(receiver.getBalance().add(transaction.getAmount()));
+        accountService.updateAccount(receiver.getId(), accountMapper.toAccountUpdateRequestDTO(receiver));
+
+        // Transaction durumunu güncelle
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setReceiverAccount(receiver);
+        transactionRepository.save(transaction);
+
+        log.info("TransactionServiceImpl::receiveMoney completed successfully for transactionId: {}", transactionId);
+        return transactionMapper.toTransactionResponseDTO(transaction);
     }
 
     @Override
@@ -210,17 +251,5 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
-    private void validateIbans(TransactionRequestDTO dto) {
-        if (!accountService.existsAccountByIban(dto.getSenderAccountIban())) {
-            throw new AccountIbanNotFoundException("Sender IBAN not found");
-        }
-
-    }
-
-    private void validateDifferentAccounts(TransactionRequestDTO dto) {
-        if (dto.getSenderAccountIban().equals(dto.getReceiverAccountIban())) {
-            throw new IllegalArgumentException("Sender and receiver IBAN cannot be the same");
-        }
-    }
 
 }

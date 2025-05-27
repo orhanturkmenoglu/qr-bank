@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,4 +25,6 @@ public class UserResponseDTO implements Serializable {
     private String email;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private List<AccountResponseDTO> accountList;
 }

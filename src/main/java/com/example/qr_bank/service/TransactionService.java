@@ -10,7 +10,8 @@ public interface TransactionService {
 
     TransactionResponseDTO sendMoney(TransactionRequestDTO transactionRequestDTO);
 
-    TransactionResponseDTO receiveMoney(TransactionRequestDTO transactionRequestDTO);
+    TransactionResponseDTO receiverMoney(String transactionId,
+                                         String receiverAccountIban);
 
     TransactionOperationResponseDTO depositMoney(TransactionOperationRequestDTO transactionOperationRequestDTO);
 

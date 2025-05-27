@@ -1,6 +1,5 @@
 package com.example.qr_bank.service;
 
-import com.example.qr_bank.dto.request.AccountRequestDTO;
 import com.example.qr_bank.dto.request.AccountUpdateRequestDTO;
 import com.example.qr_bank.dto.response.AccountResponseDTO;
 

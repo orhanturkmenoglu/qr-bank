@@ -7,10 +7,7 @@ import com.example.qr_bank.dto.response.TransactionResponseDTO;
 import com.example.qr_bank.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -25,9 +22,10 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/receive")
-    public ResponseEntity<TransactionResponseDTO> receiveMoney(@RequestBody TransactionRequestDTO requestDTO) {
-        TransactionResponseDTO response = transactionService.receiveMoney(requestDTO);
+    @GetMapping("/receiver")
+    public ResponseEntity<TransactionResponseDTO> receiveMoney(@RequestParam(value = "transactionId") String transactionId,
+                                                               @RequestParam(value = "receiverAccountIban") String receiverAccountIban) {
+        TransactionResponseDTO response = transactionService.receiverMoney(transactionId,receiverAccountIban);
         return ResponseEntity.ok(response);
     }
 
