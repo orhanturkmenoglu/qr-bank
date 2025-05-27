@@ -95,6 +95,12 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionResponseDTO receiveMoney(TransactionRequestDTO transactionRequestDTO) {
         log.info("TransactionServiceImpl::receiveMoney {}", transactionRequestDTO);
 
+        if (ObjectUtils.isEmpty(transactionRequestDTO)) {
+            log.error("TransactionServiceImpl::receiveMoney TransactionRequestDTO is null");
+            throw new TransactionNullPointerException("TransactionRequestDTO is null");
+        }
+
+
         validateIbans(transactionRequestDTO);
 
         return null;
@@ -153,7 +159,55 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public TransactionOperationResponseDTO withdrawMoney(TransactionOperationRequestDTO transactionRequestDTO) {
-        return null;
+       log.info("TransactionServiceImpl::withdrawMoney {}", transactionRequestDTO);
+
+        if (ObjectUtils.isEmpty(transactionRequestDTO)) {
+            log.error("TransactionServiceImpl::withdrawMoney TransactionRequestDTO is null");
+            throw new TransactionNullPointerException("TransactionRequestDTO is null");
+        }
+
+        if (transactionRequestDTO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            log.error("TransactionServiceImpl::withdrawMoney Amount cannot be negative");
+            throw new IllegalArgumentException("Amount cannot be negative");
+        }
+
+        if (transactionRequestDTO.getAmount().remainder(BigDecimal.TEN).compareTo(BigDecimal.ZERO) != 0) {
+            log.error("TransactionServiceImpl::withdrawMoney Amount must be a multiple of 10");
+            throw new IllegalArgumentException("Amount must be a multiple of 10");
+        }
+
+        String accountIban = transactionRequestDTO.getAccountIban();
+
+        AccountResponseDTO accountResponseDTO = accountService.getAccountByIban(accountIban);
+        Account account = accountMapper.toAccountResponseDTO(accountResponseDTO);
+
+        log.info("TransactionServiceImpl::withdrawMoney account {}", account);
+        account.setBalance(account.getBalance().subtract(transactionRequestDTO.getAmount()));
+
+        accountService.updateAccount(accountResponseDTO.getId(),
+                accountMapper.toAccountUpdateRequestDTO(account));
+
+        Transaction transaction = Transaction.builder()
+                .id(UUID.randomUUID().toString())
+                .senderAccount(null)
+                .receiverAccount(account)
+                .status(TransactionStatus.COMPLETED)
+                .transactionType(TransactionType.WITHDRAWAL)
+                .amount(transactionRequestDTO.getAmount())
+                .description(transactionRequestDTO.getDescription())
+                .qrCode(null)
+                .build();
+
+        Transaction saved = transactionRepository.save(transaction);
+
+        return TransactionOperationResponseDTO.builder()
+                .timestamp(saved.getCreatedAt())
+                .accountIban(accountIban)
+                .amount(transactionRequestDTO.getAmount())
+                .status(TransactionStatus.COMPLETED)
+                .transactionType(transactionRequestDTO.getTransactionType())
+                .description(transactionRequestDTO.getDescription())
+                .build();
     }
 
     private void validateIbans(TransactionRequestDTO dto) {

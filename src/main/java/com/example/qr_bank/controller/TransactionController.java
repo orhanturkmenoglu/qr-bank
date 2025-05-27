@@ -36,4 +36,10 @@ public class TransactionController {
         TransactionOperationResponseDTO response = transactionService.depositMoney(transactionOperationRequestDTO);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<TransactionOperationResponseDTO> withdrawMoney(@RequestBody TransactionOperationRequestDTO transactionOperationRequestDTO) {
+        TransactionOperationResponseDTO response = transactionService.withdrawMoney(transactionOperationRequestDTO);
+        return ResponseEntity.ok(response);
+    }
 }
