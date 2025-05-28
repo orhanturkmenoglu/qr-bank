@@ -13,6 +13,8 @@ import com.example.qr_bank.service.UserService;
 import com.example.qr_bank.utils.GenerateIban;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -30,46 +32,9 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final AccountMapper accountMapper;
 
-    @Transactional
-    @Override
-    public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
-        log.info("UserServiceImpl::createUser {}", userRequestDTO);
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
-        if (ObjectUtils.isEmpty(userRequestDTO)) {
-            log.error("UserServiceImpl::createUser UserRequestDTO is null");
-            throw new NullPointerException("UserRequestDTO is null");
-        }
-
-        boolean isEmailExists = userRepository.existsByEmail(userRequestDTO.getEmail());
-
-        if (isEmailExists) {
-            log.error("UserServiceImpl::createUser User with email {} already exists", userRequestDTO.getEmail());
-            throw new UserAlreadyExistsException("User with email " + userRequestDTO.getEmail() + " already exists");
-        }
-
-        User user = userMapper.toUser(userRequestDTO);
-
-        List<Account> accounts = userRequestDTO.getAccountRequestDTOS()
-                .stream()
-                .map(accountDto -> {
-                    Account account = accountMapper.toAccount(accountDto);
-                    account.setOwner(user);
-                    account.setBalance(BigDecimal.ZERO);
-                    account.setIban(GenerateIban.generateIban());
-                    account.setCurrency(userRequestDTO.getAccountRequestDTOS().get(0).getCurrency());
-                    return account;
-                })
-                .collect(Collectors.toList());
-
-        user.setAccountList(accounts);
-
-        User savedUser = userRepository.save(user);
-        log.info("UserServiceImpl::createUser saved user {}", savedUser);
-
-        log.info("UserServiceImpl::createUser created user {}", savedUser);
-        return userMapper.toUserResponseDTO(savedUser);
-
-    }
 
     @Override
     public List<UserResponseDTO> getAllUsers() {

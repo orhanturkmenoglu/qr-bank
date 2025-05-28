@@ -24,22 +24,6 @@ public class UserController {
 
     private final UserService userService;
 
-
-    @Operation(summary = "Create a new user",
-            description = "Creates a new user with the provided user details.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid request data")
-    })
-    @PostMapping
-    public ResponseEntity<UserResponseDTO> createUser(
-            @Parameter(description = "User details to create", required = true)
-            @Valid @RequestBody UserRequestDTO userRequestDTO) {
-        UserResponseDTO createdUser = userService.createUser(userRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
-    }
-
-
     @Operation(summary = "Get all users",
             description = "Returns a list of all registered users.")
     @ApiResponses(value = {

@@ -1,6 +1,5 @@
 package com.example.qr_bank.mapper.impl;
 
-import com.example.qr_bank.dto.request.AccountRequestDTO;
 import com.example.qr_bank.dto.request.UserRequestDTO;
 import com.example.qr_bank.dto.response.UserResponseDTO;
 import com.example.qr_bank.enums.Role;
@@ -10,6 +9,7 @@ import com.example.qr_bank.model.Account;
 import com.example.qr_bank.model.User;
 import com.example.qr_bank.utils.GenerateIban;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -18,6 +18,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@EnableWebSecurity(debug = true)
 public class UserMapperImpl implements UserMapper {
 
     private final AccountMapper accountMapper;
@@ -29,6 +30,16 @@ public class UserMapperImpl implements UserMapper {
             return null;
         }
 
+        List<Account> accounts = userRequestDTO.getAccountRequestDTOS()
+                .stream()
+                .map(accountDto -> {
+                    Account account = accountMapper.toAccount(accountDto);
+                    account.setBalance(BigDecimal.ZERO);
+                    account.setIban(GenerateIban.generateIban());
+                    account.setCurrency(userRequestDTO.getAccountRequestDTOS().get(0).getCurrency());
+                    return account;
+                })
+                .toList();
 
         return User.builder()
                 .id(UUID.randomUUID().toString())
@@ -36,7 +47,8 @@ public class UserMapperImpl implements UserMapper {
                 .lastName(userRequestDTO.getLastName())
                 .email(userRequestDTO.getEmail())
                 .password(userRequestDTO.getPassword())
-                .role(Role.USER)
+                .accountList(accounts)
+                .role(Role.ROLE_USER)
                 .build();
     }
 
