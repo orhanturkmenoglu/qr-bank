@@ -31,11 +31,17 @@ ayrıca hesaba para yatırma, para çekme, QR kod ile para yatırma, çekme ve �
 ## 📦 Özellikler
 
 ✅ Kullanıcı kayıt ve giriş sistemi
+
 ✅ Her kullanıcıya özel hesap (IBAN, bakiye)
+
 ✅ Hesaplar arası para transferi (EFT, havale işlemleri)
+
 ✅ Hesaba para yatırma ve para çekme işlemleri
+
 ✅ QR kod ile para yatırma, çekme ve ödeme işlemleri
+
 ✅ QR kod durum takibi (CREATED, SCANNED, COMPLETED)
+
 ✅ JWT tabanlı güvenli istekler
 ---
 ## 📸 QR Kod İş Akışı
