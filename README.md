@@ -43,6 +43,7 @@ ayrıca hesaba para yatırma, para çekme, QR kod ile para yatırma, çekme ve �
 ✅ QR kod durum takibi (CREATED, SCANNED, COMPLETED)
 
 ✅ JWT tabanlı güvenli istekler
+
 ---
 ## 📸 QR Kod İş Akışı
 
