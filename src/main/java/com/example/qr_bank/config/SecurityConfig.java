@@ -26,8 +26,8 @@ public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
 
     private final List<String> publicEndpoints = List.of(
-            "/api/v1/auth/**"
-    );
+            "/api/v1/**"
+            );
 
     private final List<String> authenticatedEndpoints = List.of(
             "/api/v1/**"

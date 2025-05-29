@@ -8,14 +8,20 @@ public enum TransactionType {
     @Schema(description = "Transaction via QR code send")
     QR_SEND,
 
+    @Schema(description = "Transaction via QR code receive")
+    QR_RECEIVE,
+
+    @Schema(description = "Transaction via QR code deposit")
+    QR_DEPOSIT,
+
+    @Schema(description = "Transaction via QR code withdrawal")
+    QR_WITHDRAWAL,
+
     @Schema(description = "Deposit transaction")
     DEPOSIT,
 
     @Schema(description = "Withdrawal transaction")
     WITHDRAWAL,
-
-    @Schema(description = "Transaction via QR code receive")
-    QR_RECEIVE,
 
     @Schema(description = "Transfer transaction")
     TRANSFER,

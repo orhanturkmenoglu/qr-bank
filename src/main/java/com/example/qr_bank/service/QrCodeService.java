@@ -1,12 +1,12 @@
 package com.example.qr_bank.service;
 
 import com.example.qr_bank.dto.request.QrCodeRequestDTO;
-import com.example.qr_bank.dto.response.QrCodeResponseDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface QrCodeService {
 
-    QrCodeResponseDTO generateQrCode(QrCodeRequestDTO qrCodeRequestDTO);
+    byte[] generateQrCode(QrCodeRequestDTO qrCodeRequestDTO) throws JsonProcessingException;
 
-    QrCodeResponseDTO decodeQrCode(String qrCodeData);
+    QrCodeRequestDTO decodeQrCode(byte[] imageBytes);
 
 }

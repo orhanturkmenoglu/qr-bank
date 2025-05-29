@@ -1,10 +1,13 @@
 package com.example.qr_bank.controller;
 
 import com.example.qr_bank.dto.request.TransactionOperationRequestDTO;
+import com.example.qr_bank.dto.request.TransactionQROperationRequestDTO;
 import com.example.qr_bank.dto.request.TransactionRequestDTO;
 import com.example.qr_bank.dto.response.TransactionOperationResponseDTO;
+import com.example.qr_bank.dto.response.TransactionQROperationResponseDTO;
 import com.example.qr_bank.dto.response.TransactionResponseDTO;
 import com.example.qr_bank.service.TransactionService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -78,5 +81,28 @@ public class TransactionController {
             @Valid @RequestBody TransactionOperationRequestDTO transactionOperationRequestDTO) {
         TransactionOperationResponseDTO response = transactionService.withdrawMoney(transactionOperationRequestDTO);
         return ResponseEntity.ok(response);
+    }
+
+
+    @Operation(summary = "Deposit Money", description = "Deposits money into an account based on the provided operation details.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Money deposited successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid deposit request")
+    })
+    @PostMapping("/deposit/qr")
+    public ResponseEntity<TransactionQROperationResponseDTO> depositWithQR(@RequestBody TransactionQROperationRequestDTO requestDTO) throws JsonProcessingException, JsonProcessingException {
+        TransactionQROperationResponseDTO responseDTO = transactionService.depositWithQR(requestDTO);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @Operation(summary = "Withdraw Money", description = "Withdraws money from an account based on the provided operation details.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Money withdrawn successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid withdrawal request")
+    })
+    @PostMapping("/withdraw/qr")
+    public ResponseEntity<TransactionQROperationResponseDTO> withdrawWithQR(@RequestBody TransactionQROperationRequestDTO requestDTO) {
+        TransactionQROperationResponseDTO responseDTO = transactionService.withdrawWithQR(requestDTO);
+        return ResponseEntity.ok(responseDTO);
     }
 }

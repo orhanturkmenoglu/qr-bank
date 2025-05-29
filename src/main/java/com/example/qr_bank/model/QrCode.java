@@ -4,7 +4,9 @@ import com.example.qr_bank.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "qr_codes")
@@ -16,6 +18,7 @@ import java.time.LocalDateTime;
 public class QrCode extends BaseEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,6 +29,10 @@ public class QrCode extends BaseEntity {
 
     private boolean isUsed;
 
+    private BigDecimal amount;
+
+    private String description;
+
     @Enumerated(EnumType.STRING)
-   private TransactionType transactionType;
+    private TransactionType transactionType;
 }

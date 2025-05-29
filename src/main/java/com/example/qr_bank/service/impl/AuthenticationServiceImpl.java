@@ -63,7 +63,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         log.info("UserServiceImpl::createUser created user {}", savedUser);
         return userMapper.toUserResponseDTO(savedUser);
 
-
     }
 
     @Override

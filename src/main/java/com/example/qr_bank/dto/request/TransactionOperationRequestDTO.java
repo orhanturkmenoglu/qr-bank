@@ -1,6 +1,7 @@
 package com.example.qr_bank.dto.request;
 
 import com.example.qr_bank.enums.TransactionType;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -33,4 +34,7 @@ public class TransactionOperationRequestDTO implements Serializable {
 
     @Schema(description = "A description of the transaction", example = "Monthly savings deposit")
     private String description;
+
+    @JsonProperty("qrCode")
+    private String QRCode;
 }
