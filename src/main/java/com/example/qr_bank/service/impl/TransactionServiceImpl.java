@@ -272,11 +272,17 @@ public class TransactionServiceImpl implements TransactionService {
         // QR kodu decode ve doğrulama
         QrCodeRequestDTO qrCodeRequestDTO = decodeAndValidateQrCode(requestDTO.getQrCode());
 
+
+        if (qrCodeRequestDTO.getTransactionType().equals(TransactionType.QR_SEND)) {
+            log.error("TransactionServiceImpl::depositWithQR Invalid transaction type for depositWithQR");
+            throw new IllegalArgumentException("Invalid transaction type for depositWithQR");
+        }
+
         // QR kodundaki IBAN'dan hesap getir
         Account account = getAccountFromQrCode(qrCodeRequestDTO);
 
         // Aktif QR kod bul
-        QrCode qrCode = findValidQrCode(account);
+        QrCode qrCode = findValidQrCode(account,qrCodeRequestDTO.getTransactionType());
 
         // Hesap bakiyesini artır
         updateAccountBalance(account, qrCodeRequestDTO.getAmount(), account.getId());
@@ -302,22 +308,9 @@ public class TransactionServiceImpl implements TransactionService {
     public TransactionQROperationResponseDTO withdrawWithQR(TransactionQROperationRequestDTO requestDTO) {
         log.info("TransactionServiceImpl::withdrawWithQR {}", requestDTO);
 
-        if (ObjectUtils.isEmpty(requestDTO)) {
-            log.error("TransactionRequestDTO is null");
-            throw new TransactionNullPointerException("TransactionRequestDTO is null");
-        }
+        validateDepositRequest(requestDTO);
 
         QrCodeRequestDTO qrCodeRequestDTO = decodeAndValidateQrCode(requestDTO.getQrCode());
-
-        if (qrCodeRequestDTO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            log.error("Amount cannot be negative");
-            throw new IllegalArgumentException("Amount cannot be negative");
-        }
-
-        if (qrCodeRequestDTO.getAmount().remainder(BigDecimal.TEN).compareTo(BigDecimal.ZERO) != 0) {
-            log.error("Amount must be a multiple of 10");
-            throw new IllegalArgumentException("Amount must be a multiple of 10");
-        }
 
         if (!qrCodeRequestDTO.getTransactionType().equals(TransactionType.QR_WITHDRAWAL)) {
             log.error("Invalid transaction type for withdrawWithQR");
@@ -325,7 +318,8 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         Account account = getAccountFromQrCode(qrCodeRequestDTO);
-        QrCode qrCode = findValidQrCode(account);
+
+        QrCode qrCode = findValidQrCode(account,qrCodeRequestDTO.getTransactionType());
 
         validateBalanceForWithdrawal(account, qrCodeRequestDTO.getAmount());
 
@@ -355,8 +349,8 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
-    private QrCode findValidQrCode(Account account) {
-        return qrCodeRepository.findByAccountAndTransactionTypeAndIsUsedFalse(account, TransactionType.QR_DEPOSIT)
+    private QrCode findValidQrCode(Account account,TransactionType  transactionType) {
+        return qrCodeRepository.findByAccountAndTransactionTypeAndIsUsedFalse(account, transactionType)
                 .filter(qr -> qr.getExpirationDate().isAfter(LocalDateTime.now()))
                 .orElseThrow(() -> new IllegalArgumentException("Valid or non-expired QR code not found for this account"));
     }
