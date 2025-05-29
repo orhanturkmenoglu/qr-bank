@@ -6,7 +6,10 @@
 
 ## 🧠 Proje Özeti
 
-QR Bank, bankacılık işlemlerini QR kod teknolojisi ile daha hızlı ve güvenli hale getirmek amacıyla geliştirilmiş bir backend sistemidir. Kullanıcılar ödeme talebi oluşturur, bu talep bir QR kod ile temsil edilir ve başka bir kullanıcı bu kodu tarayarak işlemi tamamlayabilir.
+QR Bank, kullanıcıların hesapları arasında EFT ve havale gibi para transferi işlemlerini hızlı ve güvenli şekilde gerçekleştirebildiği;
+ayrıca hesaba para yatırma, para çekme, QR kod ile para yatırma, çekme ve ödeme işlemlerini kolayca yapabildiği modern bir Spring Boot tabanlı bankacılık uygulamasıdır.
+
+
 
 ---
 
@@ -15,24 +18,30 @@ QR Bank, bankacılık işlemlerini QR kod teknolojisi ile daha hızlı ve güven
 | Teknoloji           | Açıklama                                      |
 |---------------------|-----------------------------------------------|
 | Spring Boot         | Uygulama çatısı                               |
-| Spring Security     | Kimlik doğrulama ve yetkilendirme            |
+| Spring Security     | Kimlik doğrulama ve yetkilendirme             |
 | JWT (jjwt)          | Token tabanlı authentication                  |
 | Spring Data JPA     | ORM ve veri yönetimi                          |
-| H2 Database         | Geliştirme aşamasında hafif veritabanı        |
+| MySql               | Verilerin kaydedileceği Veritabanı            |
 | ZXing (QR Code)     | QR kod üretimi ve taraması                    |
 | Lombok              | Boilerplate kodları azaltmak için             |
 | OpenAPI (Swagger)   | API dökümantasyonu (isteğe bağlı)             |
-
+| Validation           | Girdi doğrulama ve validasyon işlemleri       |
 ---
 
 ## 📦 Özellikler
 
-✅ Kullanıcı kayıt ve giriş sistemi  
-✅ Her kullanıcıya özel hesap (IBAN, bakiye)  
-✅ Para transferi (Transaction Management)  
-✅ QR kod ile ödeme talebi oluşturma  
-✅ QR kod taranarak ödeme gerçekleştirme  
-✅ QR durum takibi (`CREATED`, `SCANNED`, `COMPLETED`)  
+✅ Kullanıcı kayıt ve giriş sistemi
+
+✅ Her kullanıcıya özel hesap (IBAN, bakiye)
+
+✅ Hesaplar arası para transferi (EFT, havale işlemleri)
+
+✅ Hesaba para yatırma ve para çekme işlemleri
+
+✅ QR kod ile para yatırma, çekme ve ödeme işlemleri
+
+✅ QR kod durum takibi (CREATED, SCANNED, COMPLETED)
+
 ✅ JWT tabanlı güvenli istekler
 
 ---
