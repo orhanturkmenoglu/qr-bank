@@ -21,7 +21,7 @@ public class AccountMapperImpl implements AccountMapper {
 
         return Account.builder()
                 .currency(accountRequestDTO.getCurrency())
-                .dailyLimit(BigDecimal.valueOf(10000))
+                .dailyLimit(BigDecimal.valueOf(25000))
                 .build();
     }
 
