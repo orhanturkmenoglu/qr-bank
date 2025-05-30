@@ -25,7 +25,13 @@ Proje; QR kod oluşturma ve okuma, hesap yönetimi, ve finansal işlemler (para 
    - Başarılı işlem sonrasında ilgili hesapların bakiyesi güncellenir.  
 
 6️⃣ **Finansal İşlem Kayıtları:**  
-   - Tüm işlemler veri tabanına kaydedilir ve sonradan izlenebilir.  
+   - Tüm işlemler veri tabanına kaydedilir ve sonradan izlenebilir.
+
+7️⃣ **Günlük Transfer Limiti:**
+
+   - Kullanıcılar günlük maksimum 25.000 TL'ye kadar para transferi gerçekleştirebilir.   
+   - Limit yalnızca para gönderme işlemleri için geçerlidir. 
+   - Limit aşıldığında işlem engellenir ve kullanıcıya bilgi verilir.
 
 ---
 
