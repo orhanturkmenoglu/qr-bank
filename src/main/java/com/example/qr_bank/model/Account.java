@@ -24,6 +24,8 @@ public class Account extends BaseEntity {
 
     private BigDecimal balance;
 
+    private BigDecimal dailyLimit;
+
     @Enumerated(EnumType.STRING)
     private CurrencyType currency;
 
@@ -36,7 +38,7 @@ public class Account extends BaseEntity {
     @OneToMany(mappedBy = "receiverAccount")
     private List<Transaction> receivedTransactions;
 
-    @OneToMany(mappedBy = "account",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<QrCode> qrCodes;
 
 }

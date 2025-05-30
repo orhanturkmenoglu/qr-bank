@@ -27,6 +27,9 @@ public class AccountResponseDTO implements Serializable {
     @Schema(description = "Account balance", example = "1000.00")
     private BigDecimal balance;
 
+    @Schema(description = "Daily limit of the account", example = "1000.00")
+    private BigDecimal dailyLimit;
+
     @Schema(description = "Currency type of the account", example = "TRY")
     private CurrencyType currency;
 

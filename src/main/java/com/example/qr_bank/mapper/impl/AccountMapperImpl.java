@@ -7,6 +7,7 @@ import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.model.Account;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Component
@@ -20,6 +21,7 @@ public class AccountMapperImpl implements AccountMapper {
 
         return Account.builder()
                 .currency(accountRequestDTO.getCurrency())
+                .dailyLimit(BigDecimal.valueOf(10000))
                 .build();
     }
 
@@ -35,6 +37,7 @@ public class AccountMapperImpl implements AccountMapper {
                 .iban(accountResponseDTO.getIban())
                 .balance(accountResponseDTO.getBalance())
                 .currency(accountResponseDTO.getCurrency())
+                .dailyLimit(BigDecimal.valueOf(10000))
                 .build();
     }
 
@@ -49,6 +52,7 @@ public class AccountMapperImpl implements AccountMapper {
                 .id(account.getId())
                 .iban(account.getIban())
                 .balance(account.getBalance())
+                .dailyLimit(account.getDailyLimit())
                 .currency(account.getCurrency())
                 .ownerId(account.getOwner().getId())
                 .createdAt(account.getCreatedAt())

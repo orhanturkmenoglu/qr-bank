@@ -32,7 +32,9 @@ import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -57,13 +59,10 @@ public class TransactionServiceImpl implements TransactionService {
         String senderAccountIban = transactionRequestDTO.getSenderAccountIban();
         String receiverAccountIban = transactionRequestDTO.getReceiverAccountIban();
 
+
         if (ObjectUtils.isEmpty(transactionRequestDTO)) {
             log.error("TransactionServiceImpl::sendMoney TransactionRequestDTO is null");
             throw new TransactionNullPointerException("TransactionRequestDTO is null");
-        }
-
-        if (!accountService.existsAccountByIban(transactionRequestDTO.getSenderAccountIban())) {
-            throw new AccountIbanNotFoundException("Sender account IBAN not found");
         }
 
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -90,14 +89,25 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Sender balance is not enough");
         }
 
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+
+        BigDecimal totalTransferredToday = transactionRepository.findTotalTransferredToday(sender.getId(),
+                transactionRequestDTO.getTransactionType(), startOfDay, endOfDay);
+
+        if (totalTransferredToday.add(amount).compareTo(sender.getDailyLimit()) > 0) {
+            log.error("TransactionServiceImpl::sendMoney Sender daily limit exceeded");
+            throw new IllegalArgumentException("Sender daily limit exceeded");
+        }
+
         sender.setBalance(sender.getBalance().subtract(amount));
 
         accountService.updateAccount(sender.getId(), accountMapper.toAccountUpdateRequestDTO(sender));
 
         Transaction transaction = Transaction.builder()
                 .id(UUID.randomUUID().toString())
-                .senderAccount(sender)
                 .receiverAccount(receiver)
+                .senderAccount(sender)
                 .amount(amount)
                 .transactionType(transactionType)
                 .description(transactionRequestDTO.getDescription())
@@ -111,6 +121,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionMapper.toTransactionResponseDTO(saved);
     }
+
 
     @Override
     public TransactionResponseDTO receiverMoney(String transactionId,
@@ -178,18 +189,18 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Amount must be a multiple of 10");
         }
 
-        AccountResponseDTO receiverDto = accountService.getAccountByIban(transactionOperationDTO.getAccountIban());
+        AccountResponseDTO accountResponseDTO = accountService.getAccountByIban(transactionOperationDTO.getAccountIban());
 
-        Account account = accountMapper.toAccountResponseDTO(receiverDto);
+        Account account = accountMapper.toAccountResponseDTO(accountResponseDTO);
 
         account.setBalance(account.getBalance().add(transactionOperationDTO.getAmount()));
 
-        accountService.updateAccount(receiverDto.getId(), accountMapper.toAccountUpdateRequestDTO(account));
+        accountService.updateAccount(accountResponseDTO.getId(), accountMapper.toAccountUpdateRequestDTO(account));
 
         Transaction transaction = Transaction.builder()
                 .id(UUID.randomUUID().toString())
-                .senderAccount(null)
-                .receiverAccount(account)
+                .senderAccount(account)
+                .receiverAccount(null)
                 .status(TransactionStatus.COMPLETED)
                 .transactionType(TransactionType.DEPOSIT)
                 .amount(transactionOperationDTO.getAmount())
@@ -282,7 +293,7 @@ public class TransactionServiceImpl implements TransactionService {
         Account account = getAccountFromQrCode(qrCodeRequestDTO);
 
         // Aktif QR kod bul
-        QrCode qrCode = findValidQrCode(account,qrCodeRequestDTO.getTransactionType());
+        QrCode qrCode = findValidQrCode(account, qrCodeRequestDTO.getTransactionType());
 
         // Hesap bakiyesini artır
         updateAccountBalance(account, qrCodeRequestDTO.getAmount(), account.getId());
@@ -319,7 +330,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Account account = getAccountFromQrCode(qrCodeRequestDTO);
 
-        QrCode qrCode = findValidQrCode(account,qrCodeRequestDTO.getTransactionType());
+        QrCode qrCode = findValidQrCode(account, qrCodeRequestDTO.getTransactionType());
 
         validateBalanceForWithdrawal(account, qrCodeRequestDTO.getAmount());
 
@@ -343,13 +354,15 @@ public class TransactionServiceImpl implements TransactionService {
         return buildTransactionResponse(savedTransaction);
     }
 
+
+
     private void validateDepositRequest(TransactionQROperationRequestDTO request) {
         if (ObjectUtils.isEmpty(request)) {
             throw new TransactionNullPointerException("TransactionRequestDTO is null");
         }
     }
 
-    private QrCode findValidQrCode(Account account,TransactionType  transactionType) {
+    private QrCode findValidQrCode(Account account, TransactionType transactionType) {
         return qrCodeRepository.findByAccountAndTransactionTypeAndIsUsedFalse(account, transactionType)
                 .filter(qr -> qr.getExpirationDate().isAfter(LocalDateTime.now()))
                 .orElseThrow(() -> new IllegalArgumentException("Valid or non-expired QR code not found for this account"));
@@ -377,7 +390,7 @@ public class TransactionServiceImpl implements TransactionService {
         qrCodeRepository.save(qrCode);
     }
 
-    private TransactionQROperationResponseDTO  buildTransactionResponse(Transaction transaction) {
+    private TransactionQROperationResponseDTO buildTransactionResponse(Transaction transaction) {
         return TransactionQROperationResponseDTO.builder()
                 .transactionId(transaction.getId())
                 .timestamp(transaction.getCreatedAt())

@@ -43,7 +43,6 @@ public class TransactionMapperImpl implements TransactionMapper {
                 .receiverAccountIban(receiverIban)
                 .amount(transaction.getAmount())
                 .status(transaction.getStatus())
-                .timeStamp(transaction.getCreatedAt())
                 .description(transaction.getDescription())
                 .build();
     }

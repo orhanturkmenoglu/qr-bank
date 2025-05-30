@@ -39,5 +39,4 @@ public class TransactionResponseDTO implements Serializable {
     @Schema(description = "Description or note about the transaction", example = "Payment for invoice #1234")
     private String description;
 
-
 }
