@@ -10,7 +10,6 @@ import com.example.qr_bank.dto.response.TransactionQROperationResponseDTO;
 import com.example.qr_bank.dto.response.TransactionResponseDTO;
 import com.example.qr_bank.enums.TransactionStatus;
 import com.example.qr_bank.enums.TransactionType;
-import com.example.qr_bank.exception.AccountIbanNotFoundException;
 import com.example.qr_bank.exception.TransactionNullPointerException;
 import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.mapper.TransactionMapper;

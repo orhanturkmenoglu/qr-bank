@@ -1,6 +1,6 @@
 package com.example.qr_bank.utils;
 
-public class GenerateIban {
+public class IbanGenerator {
 
     public static String generateIban() {
         String countryCode = "TR";

@@ -7,7 +7,7 @@ import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.mapper.UserMapper;
 import com.example.qr_bank.model.Account;
 import com.example.qr_bank.model.User;
-import com.example.qr_bank.utils.GenerateIban;
+import com.example.qr_bank.utils.IbanGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.stereotype.Component;
@@ -35,7 +35,7 @@ public class UserMapperImpl implements UserMapper {
                 .map(accountDto -> {
                     Account account = accountMapper.toAccount(accountDto);
                     account.setBalance(BigDecimal.ZERO);
-                    account.setIban(GenerateIban.generateIban());
+                    account.setIban(IbanGenerator.generateIban());
                     account.setCurrency(userRequestDTO.getAccountRequestDTOS().get(0).getCurrency());
                     return account;
                 })

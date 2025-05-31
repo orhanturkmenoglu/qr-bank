@@ -8,6 +8,7 @@ import com.example.qr_bank.model.QrCode;
 import com.example.qr_bank.repository.QrCodeRepository;
 import com.example.qr_bank.service.AccountService;
 import com.example.qr_bank.service.QrCodeService;
+import com.example.qr_bank.utils.AESEncryptionUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.zxing.*;
@@ -41,6 +42,8 @@ public class QrCodeServiceImpl implements QrCodeService {
 
     private final ObjectMapper objectMapper;
 
+    private final AESEncryptionUtil AESEncryptionUtil;
+
     @Override
     public byte[] generateQrCode(QrCodeRequestDTO qrCodeRequestDTO) throws JsonProcessingException {
         log.info("QrCodeServiceImpl::generateQrCode {}", qrCodeRequestDTO);
@@ -55,6 +58,9 @@ public class QrCodeServiceImpl implements QrCodeService {
             String jsonData = objectMapper.writeValueAsString(qrCodeRequestDTO);
             log.info("QrCodeServiceImpl::generateQrCode jsonData {}", jsonData);
 
+            String encryptedData = AESEncryptionUtil.encrypt(jsonData);
+            log.info("QrCodeServiceImpl::generateQrCode encryptedData {}", encryptedData);
+
             // QR CODE URET
 
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -65,7 +71,7 @@ public class QrCodeServiceImpl implements QrCodeService {
             log.info("QrCodeServiceImpl::generateQrCode hints {}", hints);
 
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(jsonData, BarcodeFormat.QR_CODE, 250, 250, hints);
+            BitMatrix bitMatrix = qrCodeWriter.encode(encryptedData, BarcodeFormat.QR_CODE, 250, 250, hints);
             MatrixToImageWriter.writeToStream(bitMatrix, "PNG", stream);
 
             log.info("QrCodeServiceImpl::generateQrCode qrCodeWriter {}", qrCodeWriter);
@@ -113,7 +119,10 @@ public class QrCodeServiceImpl implements QrCodeService {
             BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
             Result result = new MultiFormatReader().decode(bitmap);
 
-            return objectMapper.readValue(result.getText(), QrCodeRequestDTO.class);
+            String decrypted = AESEncryptionUtil.decrypt(result.getText());
+            log.info("QrCodeServiceImpl::decodeQrCode decrypted {}", decrypted);
+
+            return objectMapper.readValue(decrypted, QrCodeRequestDTO.class);
 
         } catch (Exception e) {
             log.error("Failed to decode QR code: {}", e.getMessage(), e);

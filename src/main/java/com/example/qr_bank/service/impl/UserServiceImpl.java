@@ -2,26 +2,19 @@ package com.example.qr_bank.service.impl;
 
 import com.example.qr_bank.dto.request.UserRequestDTO;
 import com.example.qr_bank.dto.response.UserResponseDTO;
-import com.example.qr_bank.exception.UserAlreadyExistsException;
 import com.example.qr_bank.exception.UserNotFoundException;
 import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.mapper.UserMapper;
-import com.example.qr_bank.model.Account;
 import com.example.qr_bank.model.User;
 import com.example.qr_bank.repository.UserRepository;
 import com.example.qr_bank.service.UserService;
-import com.example.qr_bank.utils.GenerateIban;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.ObjectUtils;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,11 +23,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final AccountMapper accountMapper;
-
-    private final AuthenticationManager authenticationManager;
-    private final PasswordEncoder passwordEncoder;
-
 
     @Override
     public List<UserResponseDTO> getAllUsers() {
