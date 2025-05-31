@@ -1,6 +1,5 @@
 package com.example.qr_bank.service.impl;
 
-import com.example.qr_bank.dto.request.AccountRequestDTO;
 import com.example.qr_bank.dto.request.AccountUpdateRequestDTO;
 import com.example.qr_bank.dto.response.AccountResponseDTO;
 import com.example.qr_bank.exception.AccountIbanNotFoundException;
@@ -9,12 +8,12 @@ import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.model.Account;
 import com.example.qr_bank.repository.AccountRepository;
 import com.example.qr_bank.service.AccountService;
+import com.example.qr_bank.utils.AESEncryptionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +22,7 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository accountRepository;
     private final AccountMapper accountMapper;
+    private final AESEncryptionUtil encryptionUtil;
 
 
     @Override

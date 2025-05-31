@@ -7,8 +7,10 @@ import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.mapper.UserMapper;
 import com.example.qr_bank.model.Account;
 import com.example.qr_bank.model.User;
+import com.example.qr_bank.utils.AESEncryptionUtil;
 import com.example.qr_bank.utils.IbanGenerator;
 import lombok.RequiredArgsConstructor;
+import org.jasypt.util.text.AES256TextEncryptor;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,7 @@ import java.util.UUID;
 public class UserMapperImpl implements UserMapper {
 
     private final AccountMapper accountMapper;
+    private final AESEncryptionUtil encryptionUtil;
 
     @Override
     public User toUser(UserRequestDTO userRequestDTO) {
@@ -35,7 +38,7 @@ public class UserMapperImpl implements UserMapper {
                 .map(accountDto -> {
                     Account account = accountMapper.toAccount(accountDto);
                     account.setBalance(BigDecimal.ZERO);
-                    account.setIban(IbanGenerator.generateIban());
+                    account.setIban(encryptionUtil.encrypt(IbanGenerator.generateIban()));
                     account.setCurrency(userRequestDTO.getAccountRequestDTOS().get(0).getCurrency());
                     return account;
                 })

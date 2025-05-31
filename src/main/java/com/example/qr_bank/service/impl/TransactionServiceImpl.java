@@ -49,6 +49,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final QrCodeService qrCodeService;
     private final QrCodeRepository qrCodeRepository;
 
+
     @Transactional
     @Override
     public TransactionResponseDTO sendMoney(TransactionRequestDTO transactionRequestDTO) {
@@ -57,7 +58,6 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal amount = transactionRequestDTO.getAmount();
         String senderAccountIban = transactionRequestDTO.getSenderAccountIban();
         String receiverAccountIban = transactionRequestDTO.getReceiverAccountIban();
-
 
         if (ObjectUtils.isEmpty(transactionRequestDTO)) {
             log.error("TransactionServiceImpl::sendMoney TransactionRequestDTO is null");
@@ -103,6 +103,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         accountService.updateAccount(sender.getId(), accountMapper.toAccountUpdateRequestDTO(sender));
 
+
         Transaction transaction = Transaction.builder()
                 .id(UUID.randomUUID().toString())
                 .receiverAccount(receiver)
@@ -128,6 +129,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         log.info("TransactionServiceImpl::receiveMoney transactionId: {}", transactionId);
         log.info("TransactionServiceImpl::receiveMoney receiverAccountIban: {}", receiverAccountIban);
+
 
         // IBAN boş mu?
         if (!StringUtils.hasText(receiverAccountIban)) {
@@ -172,6 +174,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TransactionOperationResponseDTO depositMoney(TransactionOperationRequestDTO transactionOperationDTO) {
         log.info("TransactionServiceImpl::depositMoney {}", transactionOperationDTO);
+
 
         if (ObjectUtils.isEmpty(transactionOperationDTO)) {
             log.error("TransactionServiceImpl::depositMoney TransactionRequestDTO is null");
@@ -352,7 +355,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         return buildTransactionResponse(savedTransaction);
     }
-
 
 
     private void validateDepositRequest(TransactionQROperationRequestDTO request) {
