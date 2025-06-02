@@ -12,5 +12,7 @@ public interface UserMapper {
 
     UserResponseDTO toUserResponseDTO(User user);
 
+    User toUser(UserResponseDTO userResponseDTO);
+
     List<UserResponseDTO> toUserResponseDTOs(List<User> users);
 }

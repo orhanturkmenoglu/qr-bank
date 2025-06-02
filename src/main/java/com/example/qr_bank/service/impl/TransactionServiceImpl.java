@@ -8,9 +8,11 @@ import com.example.qr_bank.enums.TransactionType;
 import com.example.qr_bank.exception.TransactionNullPointerException;
 import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.mapper.TransactionMapper;
+import com.example.qr_bank.mapper.UserMapper;
 import com.example.qr_bank.model.Account;
 import com.example.qr_bank.model.QrCode;
 import com.example.qr_bank.model.Transaction;
+import com.example.qr_bank.model.User;
 import com.example.qr_bank.repository.QrCodeRepository;
 import com.example.qr_bank.repository.TransactionRepository;
 import com.example.qr_bank.service.AccountService;
@@ -45,6 +47,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionMapper transactionMapper;
     private final QrCodeService qrCodeService;
     private final QrCodeRepository qrCodeRepository;
+    private final UserMapper userMapper;
 
 
     @Transactional
@@ -295,18 +298,31 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Amount must be greater than zero");
         }
 
+        String senderIban = transferRequestDTO.getSenderIban();
+        AccountResponseDTO accountByIban = accountService.getAccountByIban(senderIban);
+        Account senderAccount = accountMapper.toAccountResponseDTO(accountByIban);
 
-        Transaction easyAddressTypeIsInvalid = transactionRepository.findByEasyAddressType(transferRequestDTO.getEasyAddressType())
-                .orElseThrow(() -> new IllegalArgumentException("easyAddressType is invalid"));
 
+        UserResponseDTO receiver = null;
 
-        Account senderAccount = easyAddressTypeIsInvalid.getSenderAccount();
-        Account receiverAccount = easyAddressTypeIsInvalid.getReceiverAccount();
-
-        if (senderAccount.getBalance().compareTo(transferRequestDTO.getAmount()) < 0) {
-            log.error("TransactionServiceImpl::easyAddressTransfer Insufficient balance");
-            throw new IllegalArgumentException("Insufficient balance");
+        switch (transferRequestDTO.getEasyAddressType()) {
+            case PHONE_TRANSFER:
+                receiver = userService.getUserByTelephoneNumber(transferRequestDTO.getPhoneNumber());
+                break;
+            case EMAIL_TRANSFER:
+                receiver = userService.getUserByEmail(transferRequestDTO.getEmail());
+                break;
+            case TCKN_TRANSFER:
+                receiver = userService.getUserByIdentificationNumber(transferRequestDTO.getIdentityNumber());
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid easy address type");
         }
+
+        User user = userMapper.toUser(receiver);
+
+        AccountResponseDTO accountByOwner = accountService.getAccountByOwner(user);
+        Account receiverAccount = accountMapper.toAccountResponseDTO(accountByOwner);
 
         LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
         LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);

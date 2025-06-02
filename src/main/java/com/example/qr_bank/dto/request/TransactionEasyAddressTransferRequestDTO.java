@@ -15,6 +15,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class TransactionEasyAddressTransferRequestDTO {
 
+    @Schema(description = "Sender IBAN", example = "TR330006100519786457841326")
+    private String senderIban;
+
     @Schema(description = "Type of easy address", example = "PHONE_TRANSFER")
     private EasyAddressType easyAddressType;
 

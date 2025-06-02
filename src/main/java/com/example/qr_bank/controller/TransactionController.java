@@ -1,8 +1,10 @@
 package com.example.qr_bank.controller;
 
+import com.example.qr_bank.dto.request.TransactionEasyAddressTransferRequestDTO;
 import com.example.qr_bank.dto.request.TransactionOperationRequestDTO;
 import com.example.qr_bank.dto.request.TransactionQROperationRequestDTO;
 import com.example.qr_bank.dto.request.TransactionRequestDTO;
+import com.example.qr_bank.dto.response.TransactionEasyAddressTransferResponseDTO;
 import com.example.qr_bank.dto.response.TransactionOperationResponseDTO;
 import com.example.qr_bank.dto.response.TransactionQROperationResponseDTO;
 import com.example.qr_bank.dto.response.TransactionResponseDTO;
@@ -103,6 +105,20 @@ public class TransactionController {
     @PostMapping("/withdraw/qr")
     public ResponseEntity<TransactionQROperationResponseDTO> withdrawWithQR(@RequestBody TransactionQROperationRequestDTO requestDTO) {
         TransactionQROperationResponseDTO responseDTO = transactionService.withdrawWithQR(requestDTO);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+
+    @Operation(summary = "Easy Address Transfer", description = "Performs an easy address transfer between two accounts.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Easy address transfer completed successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid transfer request")
+    })
+    @PostMapping("/easy-transfer")
+    public ResponseEntity<TransactionEasyAddressTransferResponseDTO> easyAddressTransfer(
+            @RequestBody @Valid TransactionEasyAddressTransferRequestDTO transferRequestDTO) {
+
+        TransactionEasyAddressTransferResponseDTO responseDTO = transactionService.easyAddressTransfer(transferRequestDTO);
         return ResponseEntity.ok(responseDTO);
     }
 }

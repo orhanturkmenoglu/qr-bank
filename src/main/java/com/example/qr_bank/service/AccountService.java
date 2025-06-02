@@ -2,6 +2,7 @@ package com.example.qr_bank.service;
 
 import com.example.qr_bank.dto.request.AccountUpdateRequestDTO;
 import com.example.qr_bank.dto.response.AccountResponseDTO;
+import com.example.qr_bank.model.User;
 
 import java.util.List;
 
@@ -18,5 +19,7 @@ public interface AccountService {
     boolean existsAccountByIban(String senderAccountIban);
 
     AccountResponseDTO getAccountByIban(String iban);
+
+    AccountResponseDTO getAccountByOwner(User owner);
 
 }

@@ -6,6 +6,7 @@ import com.example.qr_bank.exception.AccountIbanNotFoundException;
 import com.example.qr_bank.exception.AccountNotFoundException;
 import com.example.qr_bank.mapper.AccountMapper;
 import com.example.qr_bank.model.Account;
+import com.example.qr_bank.model.User;
 import com.example.qr_bank.repository.AccountRepository;
 import com.example.qr_bank.service.AccountService;
 import com.example.qr_bank.utils.AESEncryptionUtil;
@@ -98,6 +99,14 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findByIban(iban)
                 .orElseThrow(() -> new AccountIbanNotFoundException("User account iban not found"));
 
+        return accountMapper.toAccountResponseDTO(account);
+    }
+
+    @Override
+    public AccountResponseDTO getAccountByOwner(User owner) {
+        log.info("AccountServiceImpl::getAccountByOwner {}", owner);
+        Account account = accountRepository.findByOwner(owner)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
         return accountMapper.toAccountResponseDTO(account);
     }
 
