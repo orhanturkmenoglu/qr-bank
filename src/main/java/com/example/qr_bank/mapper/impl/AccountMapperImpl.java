@@ -88,4 +88,15 @@ public class AccountMapperImpl implements AccountMapper {
                 .build();
     }
 
+    @Override
+    public List<Account> toAccounts(List<AccountResponseDTO> accountList) {
+        if (accountList == null) {
+            return null;
+        }
+
+        return accountList.stream()
+                .map(this::toAccountResponseDTO)
+                .toList();
+    }
+
 }

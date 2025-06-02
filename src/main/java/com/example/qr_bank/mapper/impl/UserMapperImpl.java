@@ -1,6 +1,7 @@
 package com.example.qr_bank.mapper.impl;
 
 import com.example.qr_bank.dto.request.UserRequestDTO;
+import com.example.qr_bank.dto.response.AccountResponseDTO;
 import com.example.qr_bank.dto.response.UserResponseDTO;
 import com.example.qr_bank.enums.Role;
 import com.example.qr_bank.mapper.AccountMapper;
@@ -10,7 +11,6 @@ import com.example.qr_bank.model.User;
 import com.example.qr_bank.utils.AESEncryptionUtil;
 import com.example.qr_bank.utils.IbanGenerator;
 import lombok.RequiredArgsConstructor;
-import org.jasypt.util.text.AES256TextEncryptor;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.stereotype.Component;
 
@@ -84,6 +84,26 @@ public class UserMapperImpl implements UserMapper {
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .accountList(accountMapper.toAccountResponseDTOs(accountList))
+                .build();
+    }
+
+    @Override
+    public User toUser(UserResponseDTO userResponseDTO) {
+        if (userResponseDTO == null) {
+            return null;
+        }
+
+        List<AccountResponseDTO> accountList = userResponseDTO.getAccountList();
+        List<Account> accounts = accountMapper.toAccounts(accountList);
+        return User.builder()
+                .id(userResponseDTO.getId())
+                .identityNumber(userResponseDTO.getIdentityNumber())
+                .firstName(userResponseDTO.getFirstName())
+                .lastName(userResponseDTO.getLastName())
+                .email(userResponseDTO.getEmail())
+                .telephoneNumber(userResponseDTO.getTelephoneNumber())
+                .accountList(accounts)
+                // Diğer User özellikleri DTO'da yoksa varsayılanlar atanabilir.
                 .build();
     }
 

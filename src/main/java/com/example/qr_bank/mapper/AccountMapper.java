@@ -18,4 +18,6 @@ public interface AccountMapper {
     List<AccountResponseDTO> toAccountResponseDTOs(List<Account> accounts);
 
     AccountUpdateRequestDTO toAccountUpdateRequestDTO(Account account);
+
+    List<Account> toAccounts(List<AccountResponseDTO> accountList);
 }
