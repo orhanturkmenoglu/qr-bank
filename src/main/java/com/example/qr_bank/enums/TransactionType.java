@@ -30,5 +30,8 @@ public enum TransactionType {
     EFT,
 
     @Schema(description = "Internal transfer between accounts")
-    HAVALE
+    HAVALE,
+
+    @Schema(description = "Easy address transfer")
+    EASY_ADDRESS_TRANSFER
 }

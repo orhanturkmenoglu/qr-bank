@@ -46,10 +46,12 @@ public class UserMapperImpl implements UserMapper {
 
         return User.builder()
                 .id(UUID.randomUUID().toString())
+                .identityNumber(userRequestDTO.getIdentityNumber())
                 .firstName(userRequestDTO.getFirstName())
                 .lastName(userRequestDTO.getLastName())
                 .email(userRequestDTO.getEmail())
                 .password(userRequestDTO.getPassword())
+                .telephoneNumber(userRequestDTO.getTelephoneNumber())
                 .accountList(accounts)
                 .role(Role.ROLE_USER)
                 .build();
@@ -74,9 +76,11 @@ public class UserMapperImpl implements UserMapper {
 
         return UserResponseDTO.builder()
                 .id(user.getId())
+                .identityNumber(user.getIdentityNumber())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
+                .telephoneNumber(user.getTelephoneNumber())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .accountList(accountMapper.toAccountResponseDTOs(accountList))

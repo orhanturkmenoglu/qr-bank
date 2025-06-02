@@ -41,16 +41,25 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public UserResponseDTO registerUser(UserRequestDTO userRequestDTO) {
         log.info("AuthenticationServiceImpl::registerUser {}", userRequestDTO);
 
+        boolean isEmailExists = userRepository.existsByEmail(userRequestDTO.getEmail());
+        boolean isIdentityNumberExists = userRepository.existsByIdentityNumber(userRequestDTO.getIdentityNumber());
+        boolean isTelephoneNumberExists = userRepository.existsByTelephoneNumber(userRequestDTO.getTelephoneNumber());
+        String duplicateField = "";
+
         if (ObjectUtils.isEmpty(userRequestDTO)) {
             log.error("AuthenticationServiceImpl::registerUser UserRequestDTO is empty");
             throw new UserNotFoundException("Register User Request is empty");
         }
 
-        boolean isEmailExists = userRepository.existsByEmail(userRequestDTO.getEmail());
 
-        if (isEmailExists) {
-            log.error("UserServiceImpl::createUser User with email {} already exists", userRequestDTO.getEmail());
-            throw new UserAlreadyExistsException("User with email " + userRequestDTO.getEmail() + " already exists");
+        if (isEmailExists || isIdentityNumberExists || isTelephoneNumberExists) {
+            duplicateField = isEmailExists ? "email" + userRequestDTO.getEmail() :
+                    isIdentityNumberExists ?
+                            "identityNumber" + userRequestDTO.getIdentityNumber()
+                            : "telephoneNumber"+userRequestDTO.getTelephoneNumber();
+
+            log.error("UserServiceImpl::createUser User with {} already exists", duplicateField);
+            throw new UserAlreadyExistsException("User with " + duplicateField + " already exists");
         }
 
         User user = userMapper.toUser(userRequestDTO);

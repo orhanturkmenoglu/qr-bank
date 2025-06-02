@@ -41,4 +41,6 @@ public class Account extends BaseEntity {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<QrCode> qrCodes;
 
+    private boolean isActive;
+
 }

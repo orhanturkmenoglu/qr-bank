@@ -18,6 +18,9 @@ public class User extends BaseEntity {
     @Id
     private String id;
 
+    @Column(name = "identity_number")
+    private String identityNumber;
+
     @Column(name = "first_name")
     private String firstName;
 
@@ -29,6 +32,9 @@ public class User extends BaseEntity {
 
     @Column(name = "password")
     private String password;
+
+    @Column(name = "telephone_number")
+    private String telephoneNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")

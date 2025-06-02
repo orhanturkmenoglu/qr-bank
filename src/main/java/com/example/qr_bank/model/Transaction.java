@@ -1,5 +1,6 @@
 package com.example.qr_bank.model;
 
+import com.example.qr_bank.enums.EasyAddressType;
 import com.example.qr_bank.enums.TransactionStatus;
 import com.example.qr_bank.enums.TransactionType;
 import jakarta.persistence.*;
@@ -33,6 +34,11 @@ public class Transaction extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
+
+    @Enumerated(EnumType.STRING)
+    private EasyAddressType easyAddressType;
+
+    private String recipientIdentifier;
 
     private String description;
 

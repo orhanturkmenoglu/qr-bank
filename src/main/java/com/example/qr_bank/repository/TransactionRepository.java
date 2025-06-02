@@ -1,5 +1,6 @@
 package com.example.qr_bank.repository;
 
+import com.example.qr_bank.enums.EasyAddressType;
 import com.example.qr_bank.enums.TransactionType;
 import com.example.qr_bank.model.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, String> {
@@ -25,4 +27,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, String
             @Param("startOfDay") LocalDateTime startOfDay,
             @Param("endOfDay") LocalDateTime endOfDay
     );
+
+    Optional<Transaction> findByEasyAddressType(EasyAddressType easyAddressType);
 }

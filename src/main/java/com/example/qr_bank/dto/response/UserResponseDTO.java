@@ -20,6 +20,9 @@ public class UserResponseDTO implements Serializable {
     @Schema(description = "Unique identifier of the user", example = "user-1234")
     private String id;
 
+    @Schema(description = "User's identity number", example = "123456789")
+    private String identityNumber;
+
     @JsonProperty("first_name")
     @Schema(description = "User's first name", example = "John")
     private String firstName;
@@ -30,6 +33,9 @@ public class UserResponseDTO implements Serializable {
 
     @Schema(description = "User's email address", example = "john.doe@example.com")
     private String email;
+
+    @Schema(description = "User's phone number", example = "5554557780")
+    private String telephoneNumber;
 
     @Schema(description = "User creation timestamp", example = "2025-05-27T14:30:00")
     private LocalDateTime createdAt;

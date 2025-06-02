@@ -41,4 +41,7 @@ public class AccountResponseDTO implements Serializable {
 
     @Schema(description = "ID of the user who owns the account", example = "u123456")
     private String ownerId;
+
+    @Schema(description = "Flag indicating whether the account is active", example = "true")
+    private boolean isActive;
 }

@@ -1,13 +1,8 @@
 package com.example.qr_bank.service.impl;
 
-import com.example.qr_bank.dto.request.QrCodeRequestDTO;
-import com.example.qr_bank.dto.request.TransactionOperationRequestDTO;
-import com.example.qr_bank.dto.request.TransactionQROperationRequestDTO;
-import com.example.qr_bank.dto.request.TransactionRequestDTO;
-import com.example.qr_bank.dto.response.AccountResponseDTO;
-import com.example.qr_bank.dto.response.TransactionOperationResponseDTO;
-import com.example.qr_bank.dto.response.TransactionQROperationResponseDTO;
-import com.example.qr_bank.dto.response.TransactionResponseDTO;
+import com.example.qr_bank.dto.request.*;
+import com.example.qr_bank.dto.response.*;
+import com.example.qr_bank.enums.EasyAddressType;
 import com.example.qr_bank.enums.TransactionStatus;
 import com.example.qr_bank.enums.TransactionType;
 import com.example.qr_bank.exception.TransactionNullPointerException;
@@ -21,6 +16,7 @@ import com.example.qr_bank.repository.TransactionRepository;
 import com.example.qr_bank.service.AccountService;
 import com.example.qr_bank.service.QrCodeService;
 import com.example.qr_bank.service.TransactionService;
+import com.example.qr_bank.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +38,7 @@ import java.util.UUID;
 @Slf4j
 public class TransactionServiceImpl implements TransactionService {
 
+    private final UserService userService;
     private final AccountService accountService;
     private final TransactionRepository transactionRepository;
     private final AccountMapper accountMapper;
@@ -274,6 +271,84 @@ public class TransactionServiceImpl implements TransactionService {
                 .transactionType(transactionRequestDTO.getTransactionType())
                 .description(transactionRequestDTO.getDescription())
                 .build();
+    }
+
+    @Override
+    public TransactionEasyAddressTransferResponseDTO easyAddressTransfer(TransactionEasyAddressTransferRequestDTO transferRequestDTO) {
+        log.info("TransactionServiceImpl::easyAddressTransfer {}", transferRequestDTO);
+
+        if (transferRequestDTO.getEasyAddressType() == null) {
+            log.error("TransactionServiceImpl::easyAddressTransfer easyAddressType is null");
+            throw new IllegalArgumentException("easyAddressType is null");
+        }
+
+        if (!(transferRequestDTO.getEasyAddressType().equals(EasyAddressType.PHONE_TRANSFER)
+                || transferRequestDTO.getEasyAddressType().equals(EasyAddressType.EMAIL_TRANSFER)
+                || transferRequestDTO.getEasyAddressType().equals(EasyAddressType.TCKN_TRANSFER))) {
+
+            log.info("TransactionServiceImpl::easyAddressTransfer easyAddressType is invalid");
+            throw new IllegalArgumentException("easyAddressType is invalid");
+        }
+
+        if (transferRequestDTO.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            log.error("TransactionServiceImpl::easyAddressTransfer Amount cannot be negative or zero");
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+
+
+        Transaction easyAddressTypeIsInvalid = transactionRepository.findByEasyAddressType(transferRequestDTO.getEasyAddressType())
+                .orElseThrow(() -> new IllegalArgumentException("easyAddressType is invalid"));
+
+
+        Account senderAccount = easyAddressTypeIsInvalid.getSenderAccount();
+        Account receiverAccount = easyAddressTypeIsInvalid.getReceiverAccount();
+
+        if (senderAccount.getBalance().compareTo(transferRequestDTO.getAmount()) < 0) {
+            log.error("TransactionServiceImpl::easyAddressTransfer Insufficient balance");
+            throw new IllegalArgumentException("Insufficient balance");
+        }
+
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+        BigDecimal totalTransferredToday = transactionRepository.findTotalTransferredToday(senderAccount.getId(), TransactionType.EASY_ADDRESS_TRANSFER, startOfDay, endOfDay);
+
+        if (totalTransferredToday.add(transferRequestDTO.getAmount()).compareTo(senderAccount.getDailyLimit()) > 0) {
+            log.error("TransactionServiceImpl::easyAddressTransfer Sender daily limit exceeded");
+            throw new IllegalArgumentException("Sender daily limit exceeded");
+        }
+
+        senderAccount.setBalance(senderAccount.getBalance().subtract(transferRequestDTO.getAmount()));
+        receiverAccount.setBalance(receiverAccount.getBalance().add(transferRequestDTO.getAmount()));
+
+        accountService.updateAccount(senderAccount.getId(), accountMapper.toAccountUpdateRequestDTO(senderAccount));
+        accountService.updateAccount(receiverAccount.getId(), accountMapper.toAccountUpdateRequestDTO(receiverAccount));
+
+        Transaction transaction = Transaction.builder()
+                .id(UUID.randomUUID().toString())
+                .senderAccount(senderAccount)
+                .receiverAccount(receiverAccount)
+                .status(TransactionStatus.COMPLETED)
+                .transactionType(TransactionType.EASY_ADDRESS_TRANSFER)
+                .easyAddressType(transferRequestDTO.getEasyAddressType())
+                .amount(transferRequestDTO.getAmount())
+                .description(transferRequestDTO.getDescription())
+                .qrCode(null)
+                .build();
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        TransactionEasyAddressTransferResponseDTO dto = TransactionEasyAddressTransferResponseDTO.builder()
+                .transactionId(savedTransaction.getId())
+                .senderAccountId(savedTransaction.getSenderAccount().getId())
+                .receiverAccountId(savedTransaction.getReceiverAccount().getId())
+                .transactionDate(savedTransaction.getCreatedAt())
+                .easyAddressType(savedTransaction.getEasyAddressType())
+                .status(savedTransaction.getStatus())
+                .description(savedTransaction.getDescription())
+                .amount(savedTransaction.getAmount())
+                .build();
+
+        return dto;
     }
 
     @Override

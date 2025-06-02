@@ -16,6 +16,9 @@ import java.util.List;
 @Schema(description = "Request data for creating a new user")
 public class UserRequestDTO implements Serializable {
 
+    @Schema(description = "The user's identity number", example = "123456789")
+    public String identityNumber;
+
     @Schema(description = "The user's first name", example = "John")
     private String firstName;
 
@@ -28,6 +31,11 @@ public class UserRequestDTO implements Serializable {
     @Schema(description = "The user's password", example = "secureP@ssword123")
     private String password;
 
+    @Schema(description = "The user's phone number", example = "555-1234")
+    private String telephoneNumber;
+
     @Schema(description = "List of accounts to create for the user")
     private List<AccountRequestDTO> accountRequestDTOS;
+
+
 }
